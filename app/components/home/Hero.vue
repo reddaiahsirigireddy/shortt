@@ -6,12 +6,10 @@ const shortUrl = ref('')
 const copied = ref(false)
 const loading = ref(false)
 
-// Remove fake animated stats - they don't represent real data
 const realStats = ref({ links: 0, clicks: 0, users: 0 })
 
 onMounted(async () => {
   // Optionally fetch real stats from your API if available
-  // For now, leave at 0 or remove stats display
 })
 
 const generateRandomSlug = () => {
@@ -26,7 +24,6 @@ const generateRandomSlug = () => {
 const handleShorten = async () => {
   if (!url.value || loading.value) return
   
-  // Basic URL validation
   try {
     new URL(url.value)
   } catch (e) {
@@ -40,7 +37,6 @@ const handleShorten = async () => {
   try {
     const slug = generateRandomSlug()
     
-    // Use the public API endpoint without authentication
     const response = await $fetch('/api/link/create', {
       method: 'POST',
       body: {
@@ -57,7 +53,6 @@ const handleShorten = async () => {
   } catch (error) {
     console.error('Error shortening URL:', error)
     
-    // Check if it's an authentication error
     if (error.status === 401) {
       alert('Please log in to the dashboard to create short links.')
     } else {
@@ -77,7 +72,6 @@ const handleCopy = async () => {
     }, 2000)
   } catch (err) {
     console.error('Failed to copy:', err)
-    // Fallback for older browsers
     const textArea = document.createElement('textarea')
     textArea.value = shortUrl.value
     document.body.appendChild(textArea)
@@ -93,7 +87,7 @@ const handleCopy = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 relative overflow-hidden">
+  <div class="min-h-screen bg-gradient-to-br from-purple-900 via-slate-900 to-cyan-900 relative overflow-hidden">
     <!-- Animated Background Grid -->
     <div class="absolute inset-0">
       <div class="absolute inset-0 bg-grid-pattern opacity-20" />
@@ -108,19 +102,19 @@ const handleCopy = async () => {
         <!-- Badge -->
         <div class="flex justify-center mb-8 animate-fade-in">
           <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 text-white text-sm font-medium">
-            <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+            <svg class="w-4 h-4 text-cyan-400" fill="currentColor" viewBox="0 0 20 20">
               <path d="M11.983 1.907a.75.75 0 00-1.292-.657l-8.5 9.5A.75.75 0 002.75 12h6.572l-1.305 6.093a.75.75 0 001.292.657l8.5-9.5A.75.75 0 0017.25 8h-6.572l1.305-6.093z" />
             </svg>
             <span>Trusted by thousands worldwide</span>
           </div>
         </div>
 
-        <!-- Main Heading - REDUCED SIZE -->
+        <!-- Main Heading -->
         <div class="text-center mb-12 animate-slide-up">
           <h1 class="text-4xl md:text-6xl font-black text-white mb-6 leading-tight">
             Transform Long URLs
             <br />
-            Into <span class="text-gradient">Powerful</span> Links
+            Into <span class="text-gradient-primary">Powerful</span> Links
           </h1>
           <p class="text-lg md:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
             A simple, speedy, and secure link shortener with analytics, 100% powered by Cloudflare.
@@ -162,7 +156,7 @@ const handleCopy = async () => {
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
                   <span>{{ loading ? 'Shortening...' : 'Shorten URL' }}</span>
-                  <div class="absolute inset-0 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 blur-xl transition-opacity -z-10" />
+                  <div class="absolute inset-0 rounded-2xl bg-gradient-to-r from-purple-600 to-cyan-600 opacity-0 group-hover:opacity-100 blur-xl transition-opacity -z-10" />
                 </button>
                 <NuxtLink
                   to="/dashboard"
@@ -177,7 +171,7 @@ const handleCopy = async () => {
             </div>
 
             <!-- Result Display -->
-            <div v-if="shortUrl" class="mt-8 p-6 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-2xl border border-purple-500/20 animate-fade-in">
+            <div v-if="shortUrl" class="mt-8 p-6 bg-gradient-to-r from-purple-500/10 to-cyan-500/10 rounded-2xl border border-purple-500/20 animate-fade-in">
               <div class="flex items-center justify-between mb-3">
                 <span class="text-sm font-semibold text-purple-400 uppercase tracking-wider">Your Short Link</span>
                 <span class="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-bold animate-pulse">NEW</span>
@@ -232,7 +226,7 @@ const handleCopy = async () => {
           <p class="text-slate-400 mb-6">Ready to get started?</p>
           <NuxtLink
             to="/dashboard"
-            class="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-2xl hover:scale-105 transition-transform duration-300 shadow-lg hover:shadow-purple-500/50"
+            class="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-cyan-600 text-white font-bold rounded-2xl hover:scale-105 transition-transform duration-300 shadow-lg hover:shadow-purple-500/50"
           >
             <span>Access Dashboard</span>
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -252,33 +246,6 @@ const handleCopy = async () => {
   66% { transform: translate(-20px, 20px) scale(0.9); }
 }
 
-@keyframes fade-in {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes slide-up {
-  from { opacity: 0; transform: translateY(40px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes scale-in {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-.animate-fade-in {
-  animation: fade-in 0.8s ease-out forwards;
-}
-
-.animate-slide-up {
-  animation: slide-up 1s ease-out forwards;
-}
-
-.animate-scale-in {
-  animation: scale-in 0.6s ease-out forwards;
-}
-
 .bg-grid-pattern {
   background-image: 
     linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
@@ -296,7 +263,7 @@ const handleCopy = async () => {
 .orb-1 {
   width: 500px;
   height: 500px;
-  background: radial-gradient(circle, rgba(168,85,247,0.4) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(139,92,246,0.4) 0%, transparent 70%);
   top: -250px;
   right: -250px;
 }
@@ -304,7 +271,7 @@ const handleCopy = async () => {
 .orb-2 {
   width: 400px;
   height: 400px;
-  background: radial-gradient(circle, rgba(59,130,246,0.3) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(34,211,238,0.3) 0%, transparent 70%);
   bottom: -200px;
   left: -200px;
   animation-delay: 7s;
@@ -325,13 +292,6 @@ const handleCopy = async () => {
   -webkit-backdrop-filter: blur(20px);
 }
 
-.text-gradient {
-  background: linear-gradient(135deg, #a855f7 0%, #ec4899 50%, #f59e0b 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
 .btn-primary {
   position: relative;
   display: flex;
@@ -339,7 +299,7 @@ const handleCopy = async () => {
   justify-content: center;
   gap: 0.75rem;
   padding: 1.25rem 2rem;
-  background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+  background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%);
   color: white;
   font-weight: 700;
   font-size: 1.125rem;
@@ -347,12 +307,12 @@ const handleCopy = async () => {
   border: none;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 10px 40px rgba(168,85,247,0.3);
+  box-shadow: 0 10px 40px rgba(139,92,246,0.3);
 }
 
 .btn-primary:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 20px 60px rgba(168,85,247,0.5);
+  box-shadow: 0 20px 60px rgba(139,92,246,0.5);
 }
 
 .btn-primary:disabled {
@@ -395,19 +355,13 @@ const handleCopy = async () => {
 .feature-card:hover {
   transform: translateY(-5px);
   background: rgba(255,255,255,0.05);
-  border-color: rgba(168,85,247,0.2);
+  border-color: rgba(139,92,246,0.2);
 }
 
 .feature-icon {
   font-size: 3rem;
   margin-bottom: 1rem;
   display: inline-block;
-  filter: drop-shadow(0 0 20px rgba(168,85,247,0.5));
-}
-
-@media (max-width: 768px) {
-  h1 {
-    font-size: 2.5rem !important;
-  }
+  filter: drop-shadow(0 0 20px rgba(139,92,246,0.5));
 }
 </style>
