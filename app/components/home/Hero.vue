@@ -3,17 +3,17 @@ import { AreaChart } from 'lucide-vue-next'
 import { GitHubIcon } from 'vue3-simple-icons'
 import heroImg from '@/assets/images/hero.svg?raw'
 
-const { title, description, github } = useAppConfig()
+const { github } = useAppConfig()
 </script>
 
 <template>
   <main class="relative grid pt-8 pb-8 lg:grid-cols-2 place-items-center md:py-12">
     <div>
       <h1 class="text-5xl font-bold gradient-text lg:text-6xl xl:text-7xl lg:tracking-tight xl:tracking-tighter">
-        {{ title }}
+        urlsclickearn
       </h1>
       <p class="max-w-xl mt-4 text-lg text-slate-600 dark:text-slate-300">
-        {{ description }}
+        A Simple / Speedy / Secure Link Shortener with Analytics, 100% run on Cloudflare.
       </p>
       <div class="flex flex-col gap-3 mt-6 sm:flex-row">
         <a
@@ -23,7 +23,7 @@ const { title, description, github } = useAppConfig()
           rel="noopener"
         >
           <AreaChart class="w-5 h-5" />
-          {{ $t('dashboard.title') }}
+          Dashboard
         </a>
         <a
           :href="github"
@@ -34,6 +34,20 @@ const { title, description, github } = useAppConfig()
           <GitHubIcon class="w-5 h-5" />
           GitHub Repo
         </a>
+      </div>
+      
+      <!-- First Ad Script -->
+      <div class="mt-8">
+        <script type="text/javascript">
+          atOptions = {
+            'key' : '8b24d51ee53647b7adbb2cf21ec88c9a',
+            'format' : 'iframe',
+            'height' : 600,
+            'width' : 160,
+            'params' : {}
+          };
+        </script>
+        <script type="text/javascript" src="//preferablyending.com/8b24d51ee53647b7adbb2cf21ec88c9a/invoke.js"></script>
       </div>
     </div>
     <div class="hidden py-6 md:block">
