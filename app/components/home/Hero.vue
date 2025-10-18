@@ -1,16 +1,10 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onBeforeUnmount } from 'vue'
 
 const url = ref('')
 const shortUrl = ref('')
 const copied = ref(false)
 const loading = ref(false)
-
-const realStats = ref({ links: 0, clicks: 0, users: 0 })
-
-onMounted(async () => {
-  // Optionally fetch real stats from your API if available
-})
 
 const generateRandomSlug = () => {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
@@ -24,6 +18,7 @@ const generateRandomSlug = () => {
 const handleShorten = async () => {
   if (!url.value || loading.value) return
   
+  // Basic URL validation
   try {
     new URL(url.value)
   } catch (e) {
@@ -37,31 +32,56 @@ const handleShorten = async () => {
   try {
     const slug = generateRandomSlug()
     
+    // Calculate 4-hour expiry for public links
+    const fourHoursFromNow = Math.floor(Date.now() / 1000) + (4 * 60 * 60)
+    
+    // Use the public create endpoint (no auth required, no headers)
     const response = await $fetch('/api/link/create', {
       method: 'POST',
       body: {
         url: url.value,
-        slug: slug
+        slug: slug,
+        expiration: fourHoursFromNow // 4 hours expiry
       }
     })
     
     if (response && response.shortLink) {
       shortUrl.value = response.shortLink
+      // Show success notification
+      showExpiryNotification()
     } else {
       throw new Error('Failed to create short link')
     }
   } catch (error) {
     console.error('Error shortening URL:', error)
-    
-    if (error.status === 401) {
-      alert('Please log in to the dashboard to create short links.')
-    } else {
-      alert('Failed to create short link. Please try again or log in to the dashboard.')
-    }
+    alert('Failed to create short link. Please try again.')
   } finally {
     loading.value = false
   }
 }
+
+const showExpiryNotification = ref(false)
+const notificationTimeout = ref(null)
+
+function showExpiryNotification() {
+  showExpiryNotification.value = true
+  
+  // Clear any existing timeout
+  if (notificationTimeout.value) {
+    clearTimeout(notificationTimeout.value)
+  }
+  
+  // Hide notification after 5 seconds
+  notificationTimeout.value = setTimeout(() => {
+    showExpiryNotification.value = false
+  }, 5000)
+}
+
+onBeforeUnmount(() => {
+  if (notificationTimeout.value) {
+    clearTimeout(notificationTimeout.value)
+  }
+})
 
 const handleCopy = async () => {
   try {
@@ -72,6 +92,7 @@ const handleCopy = async () => {
     }, 2000)
   } catch (err) {
     console.error('Failed to copy:', err)
+    // Fallback for older browsers
     const textArea = document.createElement('textarea')
     textArea.value = shortUrl.value
     document.body.appendChild(textArea)
@@ -87,7 +108,7 @@ const handleCopy = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-purple-900 via-slate-900 to-cyan-900 relative overflow-hidden">
+  <div class="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 relative overflow-hidden">
     <!-- Animated Background Grid -->
     <div class="absolute inset-0">
       <div class="absolute inset-0 bg-grid-pattern opacity-20" />
@@ -102,7 +123,7 @@ const handleCopy = async () => {
         <!-- Badge -->
         <div class="flex justify-center mb-8 animate-fade-in">
           <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 text-white text-sm font-medium">
-            <svg class="w-4 h-4 text-cyan-400" fill="currentColor" viewBox="0 0 20 20">
+            <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
               <path d="M11.983 1.907a.75.75 0 00-1.292-.657l-8.5 9.5A.75.75 0 002.75 12h6.572l-1.305 6.093a.75.75 0 001.292.657l8.5-9.5A.75.75 0 0017.25 8h-6.572l1.305-6.093z" />
             </svg>
             <span>Trusted by thousands worldwide</span>
@@ -114,7 +135,7 @@ const handleCopy = async () => {
           <h1 class="text-4xl md:text-6xl font-black text-white mb-6 leading-tight">
             Transform Long URLs
             <br />
-            Into <span class="text-gradient-primary">Powerful</span> Links
+            Into <span class="text-gradient">Powerful</span> Links
           </h1>
           <p class="text-lg md:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
             A simple, speedy, and secure link shortener with analytics, 100% powered by Cloudflare.
@@ -156,7 +177,7 @@ const handleCopy = async () => {
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
                   <span>{{ loading ? 'Shortening...' : 'Shorten URL' }}</span>
-                  <div class="absolute inset-0 rounded-2xl bg-gradient-to-r from-purple-600 to-cyan-600 opacity-0 group-hover:opacity-100 blur-xl transition-opacity -z-10" />
+                  <div class="absolute inset-0 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 blur-xl transition-opacity -z-10" />
                 </button>
                 <NuxtLink
                   to="/dashboard"
@@ -168,10 +189,15 @@ const handleCopy = async () => {
                   <span>Dashboard</span>
                 </NuxtLink>
               </div>
+
+              <!-- Notice for public links -->
+              <div class="text-center text-sm text-slate-400">
+                <p>Public links expire in 4 hours. <NuxtLink to="/dashboard" class="text-purple-400 hover:text-purple-300 underline">Login</NuxtLink> for permanent links with analytics.</p>
+              </div>
             </div>
 
             <!-- Result Display -->
-            <div v-if="shortUrl" class="mt-8 p-6 bg-gradient-to-r from-purple-500/10 to-cyan-500/10 rounded-2xl border border-purple-500/20 animate-fade-in">
+            <div v-if="shortUrl" class="mt-8 p-6 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-2xl border border-purple-500/20 animate-fade-in">
               <div class="flex items-center justify-between mb-3">
                 <span class="text-sm font-semibold text-purple-400 uppercase tracking-wider">Your Short Link</span>
                 <span class="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-bold animate-pulse">NEW</span>
@@ -196,37 +222,29 @@ const handleCopy = async () => {
                   <span>{{ copied ? 'Copied!' : 'Copy' }}</span>
                 </button>
               </div>
+              
+              <!-- Expiry Notification Popup -->
+              <transition name="slide-up">
+                <div v-if="showExpiryNotification" class="mt-4 p-3 bg-gradient-to-r from-orange-500/20 to-yellow-500/20 rounded-xl border border-orange-500/30 flex items-center gap-3 animate-fade-in">
+                  <svg class="w-5 h-5 text-orange-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div class="flex-1">
+                    <p class="text-sm font-semibold text-orange-300">⏰ This link expires in 4 hours</p>
+                    <p class="text-xs text-orange-400/80 mt-0.5">Login to create permanent links with analytics</p>
+                  </div>
+                </div>
+              </transition>
             </div>
-          </div>
-        </div>
-
-        <!-- Feature Highlights -->
-        <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 animate-fade-in mb-20">
-          <div class="feature-card">
-            <div class="feature-icon">⚡</div>
-            <h3 class="text-xl font-bold text-white mb-3">Lightning Fast</h3>
-            <p class="text-slate-400">Generate short links in milliseconds with our optimized infrastructure</p>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-icon">📊</div>
-            <h3 class="text-xl font-bold text-white mb-3">Advanced Analytics</h3>
-            <p class="text-slate-400">Track every click with detailed insights and real-time data</p>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-icon">🔒</div>
-            <h3 class="text-xl font-bold text-white mb-3">Enterprise Security</h3>
-            <p class="text-slate-400">Bank-level encryption and GDPR compliant data protection</p>
           </div>
         </div>
 
         <!-- CTA Section -->
         <div class="text-center animate-fade-in">
-          <p class="text-slate-400 mb-6">Ready to get started?</p>
+          <p class="text-slate-400 mb-6">Ready for advanced features?</p>
           <NuxtLink
             to="/dashboard"
-            class="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-cyan-600 text-white font-bold rounded-2xl hover:scale-105 transition-transform duration-300 shadow-lg hover:shadow-purple-500/50"
+            class="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-2xl hover:scale-105 transition-transform duration-300 shadow-lg hover:shadow-purple-500/50"
           >
             <span>Access Dashboard</span>
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -246,6 +264,33 @@ const handleCopy = async () => {
   66% { transform: translate(-20px, 20px) scale(0.9); }
 }
 
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.8s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slide-up 1s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.6s ease-out forwards;
+}
+
 .bg-grid-pattern {
   background-image: 
     linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
@@ -263,7 +308,7 @@ const handleCopy = async () => {
 .orb-1 {
   width: 500px;
   height: 500px;
-  background: radial-gradient(circle, rgba(139,92,246,0.4) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(168,85,247,0.4) 0%, transparent 70%);
   top: -250px;
   right: -250px;
 }
@@ -271,7 +316,7 @@ const handleCopy = async () => {
 .orb-2 {
   width: 400px;
   height: 400px;
-  background: radial-gradient(circle, rgba(34,211,238,0.3) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(59,130,246,0.3) 0%, transparent 70%);
   bottom: -200px;
   left: -200px;
   animation-delay: 7s;
@@ -292,6 +337,13 @@ const handleCopy = async () => {
   -webkit-backdrop-filter: blur(20px);
 }
 
+.text-gradient {
+  background: linear-gradient(135deg, #a855f7 0%, #ec4899 50%, #f59e0b 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 .btn-primary {
   position: relative;
   display: flex;
@@ -299,7 +351,7 @@ const handleCopy = async () => {
   justify-content: center;
   gap: 0.75rem;
   padding: 1.25rem 2rem;
-  background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%);
+  background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
   color: white;
   font-weight: 700;
   font-size: 1.125rem;
@@ -307,12 +359,12 @@ const handleCopy = async () => {
   border: none;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 10px 40px rgba(139,92,246,0.3);
+  box-shadow: 0 10px 40px rgba(168,85,247,0.3);
 }
 
 .btn-primary:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 20px 60px rgba(139,92,246,0.5);
+  box-shadow: 0 20px 60px rgba(168,85,247,0.5);
 }
 
 .btn-primary:disabled {
@@ -343,25 +395,25 @@ const handleCopy = async () => {
   transform: translateY(-2px);
 }
 
-.feature-card {
-  padding: 2rem;
-  background: rgba(255,255,255,0.02);
-  backdrop-filter: blur(10px);
-  border-radius: 1.5rem;
-  border: 1px solid rgba(255,255,255,0.05);
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2.5rem !important;
+  }
+}
+
+/* Slide up transition for notification */
+.slide-up-enter-active,
+.slide-up-leave-active {
   transition: all 0.3s ease;
 }
 
-.feature-card:hover {
-  transform: translateY(-5px);
-  background: rgba(255,255,255,0.05);
-  border-color: rgba(139,92,246,0.2);
+.slide-up-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
 }
 
-.feature-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  display: inline-block;
-  filter: drop-shadow(0 0 20px rgba(139,92,246,0.5));
+.slide-up-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
 }
 </style>
