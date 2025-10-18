@@ -6,42 +6,42 @@ const features = [
     title: 'URL Shortening',
     description: 'Compress your URLs to their minimal length',
     icon: Link,
-    bgColor: 'bg-gradient-to-br from-purple-500 to-pink-500',
+    bgColor: 'bg-gradient-to-br from-purple-500 to-violet-600',
     textColor: 'text-purple-600 dark:text-purple-400'
   },
   {
     title: 'Analytics',
     description: 'Monitor link analytics and gather insightful statistics',
     icon: AreaChart,
-    bgColor: 'bg-gradient-to-br from-pink-500 to-rose-500',
-    textColor: 'text-pink-600 dark:text-pink-400'
+    bgColor: 'bg-gradient-to-br from-cyan-500 to-blue-600',
+    textColor: 'text-cyan-600 dark:text-cyan-400'
   },
   {
     title: 'Serverless',
     description: 'Deploy without the need for traditional servers',
     icon: ServerOff,
-    bgColor: 'bg-gradient-to-br from-blue-500 to-cyan-500',
-    textColor: 'text-blue-600 dark:text-blue-400'
+    bgColor: 'bg-gradient-to-br from-pink-500 to-rose-600',
+    textColor: 'text-pink-600 dark:text-pink-400'
   },
   {
     title: 'Customizable Slug',
     description: 'Support for personalized slugs and case sensitivity',
     icon: Paintbrush,
-    bgColor: 'bg-gradient-to-br from-green-500 to-emerald-500',
-    textColor: 'text-green-600 dark:text-green-400'
+    bgColor: 'bg-gradient-to-br from-emerald-500 to-green-600',
+    textColor: 'text-emerald-600 dark:text-emerald-400'
   },
   {
     title: 'AI Slug',
     description: 'Leverage AI to generate slugs',
     icon: Sparkles,
-    bgColor: 'bg-gradient-to-br from-yellow-500 to-orange-500',
-    textColor: 'text-yellow-600 dark:text-yellow-400'
+    bgColor: 'bg-gradient-to-br from-amber-500 to-orange-600',
+    textColor: 'text-amber-600 dark:text-amber-400'
   },
   {
     title: 'Link Expiration',
     description: 'Set expiration dates for your links',
     icon: Hourglass,
-    bgColor: 'bg-gradient-to-br from-indigo-500 to-purple-500',
+    bgColor: 'bg-gradient-to-br from-indigo-500 to-purple-600',
     textColor: 'text-indigo-600 dark:text-indigo-400'
   },
 ]
@@ -78,11 +78,6 @@ const features = [
       </div>
     </div>
     
-    <!-- Second Ad Script -->
-    <div class="mt-12 flex justify-center">
-      <script type='text/javascript' src='//preferablyending.com/b1/c5/45/b1c5454db9d9699cc2f9072a41d2f475.js'></script>
-    </div>
-    
-    <div class="h-1 mt-16 bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 opacity-75"></div>
+    <div class="h-1 mt-16 bg-gradient-to-r from-purple-500 via-cyan-500 to-pink-500 opacity-75"></div>
   </main>
 </template>
