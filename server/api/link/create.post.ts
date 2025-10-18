@@ -39,7 +39,7 @@ export default eventHandler(async (event) => {
   const existingLink = await KV.get(`link:${link.slug}`)
   if (existingLink) {
     throw createError({
-      status: 409, // Conflict
+      status: 409,
       statusText: 'Link already exists',
     })
   }
@@ -75,22 +75,39 @@ export default eventHandler(async (event) => {
 
 ---
 
-## 📋 **All 3 Files You Need to Update**
-
-Here's the complete list with full paths:
-
-### **1. Hero Component**
-```
-app/components/home/Hero.vue
-```
-👉 Use the code from artifact `hero_component`
-
-### **2. Auth Middleware**
-```
-server/middleware/2.auth.ts
-```
-👉 Use the code from artifact `auth_middleware`
-
-### **3. Create API (This One!)**
+## 📁 File Location
 ```
 server/api/link/create.post.ts
+```
+
+---
+
+## 🔍 What Happened?
+
+When I provided the code earlier, I included markdown documentation text at the bottom of the file. You likely copied everything including the documentation markers like:
+```
+```typescript
+👉 Use the code from artifact `hero_component`
+```
+
+These markdown artifacts got pasted into your actual TypeScript file, causing a syntax error.
+
+---
+
+## ✅ Quick Checklist
+
+Make sure these 3 files are clean (no markdown/documentation text):
+
+1. ✅ `app/components/home/Hero.vue` - Use the full code I provided earlier
+2. ✅ `server/middleware/2.auth.ts` - Should be clean
+3. ✅ `server/api/link/create.post.ts` - Use the code above ☝️
+
+---
+
+## 🚀 Next Steps
+
+1. Replace `server/api/link/create.post.ts` with the clean code above
+2. Commit and push
+3. Your build should now succeed!
+
+The error should be resolved now. Let me know if you see any other issues! 💪
