@@ -1,5 +1,7 @@
 <script setup>
 import { onMounted, ref } from 'vue'
+import Footer from '@/components/layouts/Footer.vue'
+import Header from '@/components/layouts/Header.vue'
 
 const url = ref('')
 const slug = ref('')
@@ -10,6 +12,7 @@ const recentList = ref([])
 const copied = ref(false)
 const showAdModal = ref(false)
 const adTimer = ref(5)
+const showExpiryNotification = ref(false)
 
 // Animated stats
 const animatedStats = ref({
@@ -109,6 +112,12 @@ async function createShort() {
     url.value = ''
     slug.value = ''
 
+    // Show expiry notification
+    showExpiryNotification.value = true
+    setTimeout(() => {
+      showExpiryNotification.value = false
+    }, 5000)
+
     await loadRecent()
   }
   catch (err) {
@@ -150,7 +159,6 @@ function selectAll(event) {
 }
 
 function openQR() {
-  // QR code generation logic
   window.open(`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(short.value)}`, '_blank')
 }
 
@@ -162,13 +170,6 @@ function shareLink(platform) {
     linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
   }
   window.open(urls[platform], '_blank', 'width=600,height=400')
-}
-
-function _skipAd() {
-  if (adTimer.value === 0) {
-    showAdModal.value = false
-    // Redirect to destination
-  }
 }
 
 function scrollToTop() {
@@ -207,27 +208,13 @@ onMounted(() => {
   nativeScript.async = true
   nativeScript.setAttribute('data-cfasync', 'false')
   nativeScript.src = '//preferablyending.com/baafe128a08c806c01cbd4b9d77ced82/invoke.js'
-  document.getElementById('container-baafe128a08c806c01cbd4b9d77ced82').appendChild(nativeScript)
-  console.log('Native Async Ad Banner script loaded.')
+  document.getElementById('container-baafe128a08c806c01cbd4b9d77ced82')?.appendChild(nativeScript)
 
   // Load Popunder Ad script
   const popunderScript = document.createElement('script')
   popunderScript.type = 'text/javascript'
   popunderScript.src = '//preferablyending.com/84/38/22/84382233fb94a7cfb87278684808293a.js'
-  document.getElementById('popunder-ad-container').appendChild(popunderScript)
-  console.log('Popunder Ad script loaded.')
-
-  // Dynamically load the ads script
-  const script = document.createElement('script')
-  script.src = 'https://example.com/ads.js' // Replace with the actual ads script URL
-  script.async = true
-  document.body.appendChild(script)
-
-  // Dynamically load the Anti-Adblock JS script
-  const antiAdblockScript = document.createElement('script')
-  antiAdblockScript.src = '//preferablyending.com/84/38/22/84382233fb94a7cfb87278684808293a.js'
-  antiAdblockScript.async = true
-  document.body.appendChild(antiAdblockScript)
+  document.getElementById('popunder-ad-container')?.appendChild(popunderScript)
 })
 </script>
 
@@ -265,7 +252,7 @@ export default {
     <main>
       <!-- HERO SECTION -->
       <section class="hero-gradient min-h-screen relative overflow-hidden">
-        <!-- Animated Background with New Colors -->
+        <!-- Animated Background -->
         <div class="absolute inset-0">
           <div class="floating-circle circle-1" />
           <div class="floating-circle circle-2" />
@@ -375,6 +362,22 @@ export default {
             </transition>
           </div>
 
+          <!-- Expiry Notification -->
+          <transition name="notification-slide">
+            <div v-if="showExpiryNotification" class="expiry-notification">
+              <div class="notification-content">
+                <div class="notification-icon">⏰</div>
+                <div class="notification-text">
+                  <p class="notification-title">This link expires in 4 hours</p>
+                  <p class="notification-subtitle">Login to create permanent links</p>
+                </div>
+                <button class="notification-close" @click="showExpiryNotification = false">
+                  ✕
+                </button>
+              </div>
+            </div>
+          </transition>
+
           <!-- Quick Stats -->
           <div class="quick-stats">
             <div class="stat-item">
@@ -393,7 +396,7 @@ export default {
         </div>
       </section>
 
-      <!-- # Add Section: Native Async Ad Banner Before Features -->
+      <!-- Native Async Ad Banner -->
       <section>
         <div id="container-baafe128a08c806c01cbd4b9d77ced82" />
       </section>
@@ -414,13 +417,9 @@ export default {
           <div class="features-grid">
             <div class="feature-card group">
               <div class="feature-icon-wrapper">
-                <div class="feature-icon">
-                  ⚡
-                </div>
+                <div class="feature-icon">⚡</div>
               </div>
-              <h3 class="feature-title">
-                Lightning Fast
-              </h3>
+              <h3 class="feature-title">Lightning Fast</h3>
               <p class="feature-desc">
                 Create short links instantly with our optimized infrastructure
               </p>
@@ -429,13 +428,9 @@ export default {
 
             <div class="feature-card group">
               <div class="feature-icon-wrapper">
-                <div class="feature-icon">
-                  📊
-                </div>
+                <div class="feature-icon">📊</div>
               </div>
-              <h3 class="feature-title">
-                Real-time Analytics
-              </h3>
+              <h3 class="feature-title">Real-time Analytics</h3>
               <p class="feature-desc">
                 Track clicks, locations, devices, and more in real-time
               </p>
@@ -444,13 +439,9 @@ export default {
 
             <div class="feature-card group">
               <div class="feature-icon-wrapper">
-                <div class="feature-icon">
-                  🎨
-                </div>
+                <div class="feature-icon">🎨</div>
               </div>
-              <h3 class="feature-title">
-                Custom Aliases
-              </h3>
+              <h3 class="feature-title">Custom Aliases</h3>
               <p class="feature-desc">
                 Create memorable branded short links with custom aliases
               </p>
@@ -459,13 +450,9 @@ export default {
 
             <div class="feature-card group">
               <div class="feature-icon-wrapper">
-                <div class="feature-icon">
-                  📱
-                </div>
+                <div class="feature-icon">📱</div>
               </div>
-              <h3 class="feature-title">
-                QR Codes
-              </h3>
+              <h3 class="feature-title">QR Codes</h3>
               <p class="feature-desc">
                 Generate QR codes for your links instantly
               </p>
@@ -474,13 +461,9 @@ export default {
 
             <div class="feature-card group">
               <div class="feature-icon-wrapper">
-                <div class="feature-icon">
-                  🔒
-                </div>
+                <div class="feature-icon">🔒</div>
               </div>
-              <h3 class="feature-title">
-                Secure & Reliable
-              </h3>
+              <h3 class="feature-title">Secure & Reliable</h3>
               <p class="feature-desc">
                 Enterprise-grade security with 99.9% uptime guarantee
               </p>
@@ -489,13 +472,9 @@ export default {
 
             <div class="feature-card group">
               <div class="feature-icon-wrapper">
-                <div class="feature-icon">
-                  🤖
-                </div>
+                <div class="feature-icon">🤖</div>
               </div>
-              <h3 class="feature-title">
-                AI-Powered
-              </h3>
+              <h3 class="feature-title">AI-Powered</h3>
               <p class="feature-desc">
                 Smart slug suggestions powered by artificial intelligence
               </p>
@@ -505,7 +484,7 @@ export default {
         </div>
       </section>
 
-      <!-- # Add Section: Popunder Ad After Features -->
+      <!-- Popunder Ad -->
       <section>
         <div id="popunder-ad-container" />
       </section>
@@ -515,9 +494,7 @@ export default {
         <div class="container mx-auto px-4">
           <div class="section-header">
             <span class="section-badge">TRENDING</span>
-            <h2 class="section-title">
-              Recently Created Links
-            </h2>
+            <h2 class="section-title">Recently Created Links</h2>
           </div>
 
           <div class="links-container">
@@ -550,9 +527,7 @@ export default {
       <!-- CTA SECTION -->
       <section class="cta-section">
         <div class="container mx-auto px-4 text-center">
-          <h2 class="cta-title">
-            Start shortening links today
-          </h2>
+          <h2 class="cta-title">Start shortening links today</h2>
           <p class="cta-subtitle">
             Join thousands of users who trust us with their links
           </p>
@@ -571,7 +546,6 @@ export default {
       <div class="footer-ad">
         <div class="container mx-auto px-4">
           <div class="ad-wrapper">
-            <!-- Footer ad placement -->
             <div class="ad-placeholder-footer">
               Advertisement Space
             </div>
@@ -584,7 +558,6 @@ export default {
 </template>
 
 <style scoped>
-/* Global Styles */
 * {
   box-sizing: border-box;
 }
@@ -866,22 +839,6 @@ export default {
 }
 
 .btn-copy, .btn-qr {
-  padding: 0.75rem 1.5rem;
-  border-radius: 10px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-copy:hover, .btn-qr:hover {
-/* Continuing from .result-input::selection */
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.btn-copy, .btn-qr {
   padding: 0.75rem 1.25rem;
   border-radius: 10px;
   border: 2px solid rgba(255, 255, 255, 0.3);
@@ -932,6 +889,107 @@ export default {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
+/* Expiry Notification */
+.expiry-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  max-width: 400px;
+  animation: slideInRight 0.5s ease;
+}
+
+.notification-content {
+  background: linear-gradient(135deg, #FF8C42 0%, #FF6B35 100%);
+  border-radius: 16px;
+  padding: 1.25rem;
+  box-shadow: 0 10px 40px rgba(255, 107, 53, 0.4);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.notification-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+  animation: pulse-icon 2s infinite;
+}
+
+@keyframes pulse-icon {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.notification-text {
+  flex: 1;
+  color: white;
+}
+
+.notification-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.notification-subtitle {
+  font-size: 0.875rem;
+  opacity: 0.95;
+  font-weight: 500;
+}
+
+.notification-close {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1rem;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.notification-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+.notification-slide-enter-active {
+  animation: slideInRight 0.5s ease;
+}
+
+.notification-slide-leave-active {
+  animation: slideOutRight 0.5s ease;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+}
+
 /* Quick Stats */
 .quick-stats {
   display: grid;
@@ -974,112 +1032,6 @@ export default {
   opacity: 0.95;
   text-transform: uppercase;
   letter-spacing: 1px;
-}
-
-/* Ad Modal */
-.ad-modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(5px);
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-}
-
-.ad-modal {
-  background: white;
-  border-radius: 20px;
-  max-width: 800px;
-  width: 100%;
-  overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-  animation: modalSlideIn 0.3s ease;
-}
-
-@keyframes modalSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.ad-header {
-  background: linear-gradient(135deg, #FF6B35 0%, #F72B7E 100%);
-  color: white;
-  padding: 1.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.ad-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-}
-
-.ad-timer {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  background: rgba(255, 255, 255, 0.2);
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  position: relative;
-}
-
-.timer-progress {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  height: 3px;
-  background: #ffd700;
-  border-radius: 3px;
-  transition: width 1s linear;
-}
-
-.ad-content {
-  padding: 2rem;
-  min-height: 400px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.ad-placeholder {
-  width: 100%;
-  height: 300px;
-  background: #f7fafc;
-  border: 2px dashed #cbd5e0;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #a0aec0;
-  font-size: 1.125rem;
-}
-
-.btn-skip {
-  width: 100%;
-  background: linear-gradient(135deg, #FF6B35 0%, #F72B7E 100%);
-  color: #ffffff;
-  padding: 1.25rem;
-  border: none;
-  font-size: 1.125rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-skip:hover {
-  background: linear-gradient(135deg, #F72B7E 0%, #FF6B35 100%);
-  transform: translateY(-2px);
 }
 
 /* Features Section */
@@ -1437,16 +1389,6 @@ export default {
   transform: scale(1.05);
 }
 
-.modal-fade-enter-active,
-.modal-fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.modal-fade-enter-from,
-.modal-fade-leave-to {
-  opacity: 0;
-}
-
 /* Responsive Design */
 @media (max-width: 768px) {
   .hero-title {
@@ -1491,6 +1433,29 @@ export default {
   .cta-buttons .btn-secondary {
     width: 100%;
     max-width: 300px;
+  }
+
+  .expiry-notification {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    max-width: none;
+  }
+
+  .notification-content {
+    padding: 1rem;
+  }
+
+  .notification-icon {
+    font-size: 1.5rem;
+  }
+
+  .notification-title {
+    font-size: 0.875rem;
+  }
+
+  .notification-subtitle {
+    font-size: 0.75rem;
   }
 }
 
@@ -1569,6 +1534,10 @@ export default {
   display: flex;
 }
 
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
 .items-center {
   align-items: center;
 }
@@ -1616,13 +1585,16 @@ export default {
   height: 1.25rem;
 }
 
+.group {
+  position: relative;
+}
+
 @media (min-width: 768px) {
-  .md\\:grid-cols-3 {
+  .md\:grid-cols-3 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .md\\:col-span-2 {
+  .md\:col-span-2 {
     grid-column: span 2 / span 2;
   }
 }
-</style>
