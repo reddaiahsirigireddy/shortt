@@ -1,7 +1,5 @@
 <script setup>
 import { onMounted, ref } from 'vue'
-import Footer from '@/components/layouts/Footer.vue'
-import Header from '@/components/layouts/Header.vue'
 
 const url = ref('')
 const slug = ref('')
