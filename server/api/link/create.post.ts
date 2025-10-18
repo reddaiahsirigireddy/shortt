@@ -7,6 +7,7 @@ defineRouteMeta({
       required: true,
       content: {
         'application/json': {
+          // Need: https://github.com/nitrojs/nitro/issues/2974
           schema: {
             type: 'object',
             required: ['url'],
@@ -34,37 +35,27 @@ export default eventHandler(async (event) => {
 
   const { cloudflare } = event.context
   const { KV } = cloudflare.env
-  
   const existingLink = await KV.get(`link:${link.slug}`)
   if (existingLink) {
     throw createError({
-      status: 409,
+      status: 409, // Conflict
       statusText: 'Link already exists',
     })
   }
 
-  const token = getHeader(event, 'Authorization')?.replace(/^Bearer\s+/, '')
-  const isPublicRequest = !token || token !== useRuntimeConfig(event).siteToken
-  
-  if (isPublicRequest) {
-    const fourHoursFromNow = Math.floor(Date.now() / 1000) + (4 * 60 * 60)
-    if (!link.expiration || link.expiration > fourHoursFromNow) {
-      link.expiration = fourHoursFromNow
-    }
-  }
+  else {
+    const expiration = getExpiration(event, link.expiration)
 
-  const expiration = getExpiration(event, link.expiration)
-
-  await KV.put(`link:${link.slug}`, JSON.stringify(link), {
-    expiration,
-    metadata: {
+    await KV.put(`link:${link.slug}`, JSON.stringify(link), {
       expiration,
-      url: link.url,
-      comment: link.comment,
-    },
-  })
-  
-  setResponseStatus(event, 201)
-  const shortLink = `${getRequestProtocol(event)}://${getRequestHost(event)}/${link.slug}`
-  return { link, shortLink }
+      metadata: {
+        expiration,
+        url: link.url,
+        comment: link.comment,
+      },
+    })
+    setResponseStatus(event, 201)
+    const shortLink = `${getRequestProtocol(event)}://${getRequestHost(event)}/${link.slug}`
+    return { link, shortLink }
+  }
 })
