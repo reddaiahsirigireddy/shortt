@@ -3,7 +3,7 @@ import { Ellipsis, X } from 'lucide-vue-next'
 import { GitHubIcon } from 'vue3-simple-icons'
 
 const showMenu = ref(false)
-const { title, github } = useAppConfig()
+const { github } = useAppConfig()
 </script>
 
 <template>
@@ -15,7 +15,7 @@ const { title, github } = useAppConfig()
         <div class="flex items-center justify-start w-1/4 h-full pr-4">
           <a
             href="/"
-            :title="title"
+            title="urlsclickearn"
             class="flex items-center py-4 space-x-2 text-xl font-black text-gray-900 dark:text-gray-100 md:py-0"
           >
             <span
@@ -23,11 +23,11 @@ const { title, github } = useAppConfig()
             >
               <img
                 src="/sink.png"
-                :alt="title"
+                alt="urlsclickearn"
                 class="w-full h-full rounded-full"
               >
             </span>
-            <span class="mx-2">{{ title }}</span>
+            <span class="mx-2">urlsclickearn</span>
           </a>
         </div>
 
@@ -41,7 +41,7 @@ const { title, github } = useAppConfig()
           >
             <a
               href="/"
-              :title="title"
+              title="urlsclickearn"
               class="inline-flex items-center w-auto h-16 px-4 text-xl font-black leading-none text-gray-900 dark:text-gray-100 md:hidden"
             >
               <span
@@ -49,11 +49,11 @@ const { title, github } = useAppConfig()
               >
                 <img
                   src="/sink.png"
-                  :alt="title"
+                  alt="urlsclickearn"
                   class="w-full h-full rounded-full"
                 >
               </span>
-              <span class="mx-2">{{ title }}</span>
+              <span class="mx-2">urlsclickearn</span>
             </a>
             <div class="w-auto mx-4" />
             <div
@@ -62,8 +62,8 @@ const { title, github } = useAppConfig()
               <a
                 class="w-full px-6 py-2 mr-0 text-gray-700 cursor-pointer dark:text-gray-300 md:px-3 md:mr-2 lg:mr-3 md:w-auto"
                 href="/dashboard"
-                :title="`${title} Dashboard`"
-              >{{ $t('dashboard.title') }}</a>
+                title="Dashboard"
+              >Dashboard</a>
               <a
                 :href="github"
                 target="_blank"
