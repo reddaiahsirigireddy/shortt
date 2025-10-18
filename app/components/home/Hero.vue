@@ -5,30 +5,14 @@ const url = ref('')
 const shortUrl = ref('')
 const copied = ref(false)
 const loading = ref(false)
-const stats = ref({ links: 0, clicks: 0, users: 0 })
 
-let statsInterval = null
+// Remove fake animated stats - they don't represent real data
+const realStats = ref({ links: 0, clicks: 0, users: 0 })
 
-onMounted(() => {
-  // Animate stats on mount
-  statsInterval = setInterval(() => {
-    stats.value = {
-      links: stats.value.links < 847 ? stats.value.links + 17 : 847,
-      clicks: stats.value.clicks < 2.4 ? Math.min(stats.value.clicks + 0.05, 2.4) : 2.4,
-      users: stats.value.users < 12.3 ? Math.min(stats.value.users + 0.25, 12.3) : 12.3
-    }
-  }, 50)
+onMounted(async () => {
+  // Optionally fetch real stats from your API if available
+  // For now, leave at 0 or remove stats display
 })
-
-onUnmounted(() => {
-  if (statsInterval) {
-    clearInterval(statsInterval)
-  }
-})
-
-const formatNumber = (num) => {
-  return Math.floor(num)
-}
 
 const generateRandomSlug = () => {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
@@ -42,26 +26,43 @@ const generateRandomSlug = () => {
 const handleShorten = async () => {
   if (!url.value || loading.value) return
   
+  // Basic URL validation
+  try {
+    new URL(url.value)
+  } catch (e) {
+    alert('Please enter a valid URL (include http:// or https://)')
+    return
+  }
+  
   loading.value = true
+  shortUrl.value = ''
+  
   try {
     const slug = generateRandomSlug()
+    
+    // Use the public API endpoint without authentication
     const response = await $fetch('/api/link/create', {
       method: 'POST',
       body: {
         url: url.value,
         slug: slug
-      },
-      headers: {
-        'Content-Type': 'application/json'
       }
     })
     
     if (response && response.shortLink) {
       shortUrl.value = response.shortLink
+    } else {
+      throw new Error('Failed to create short link')
     }
   } catch (error) {
     console.error('Error shortening URL:', error)
-    alert('Failed to create short link. Please try again.')
+    
+    // Check if it's an authentication error
+    if (error.status === 401) {
+      alert('Please log in to the dashboard to create short links.')
+    } else {
+      alert('Failed to create short link. Please try again or log in to the dashboard.')
+    }
   } finally {
     loading.value = false
   }
@@ -76,6 +77,17 @@ const handleCopy = async () => {
     }, 2000)
   } catch (err) {
     console.error('Failed to copy:', err)
+    // Fallback for older browsers
+    const textArea = document.createElement('textarea')
+    textArea.value = shortUrl.value
+    document.body.appendChild(textArea)
+    textArea.select()
+    document.execCommand('copy')
+    document.body.removeChild(textArea)
+    copied.value = true
+    setTimeout(() => {
+      copied.value = false
+    }, 2000)
   }
 }
 </script>
@@ -99,20 +111,19 @@ const handleCopy = async () => {
             <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
               <path d="M11.983 1.907a.75.75 0 00-1.292-.657l-8.5 9.5A.75.75 0 002.75 12h6.572l-1.305 6.093a.75.75 0 001.292.657l8.5-9.5A.75.75 0 0017.25 8h-6.572l1.305-6.093z" />
             </svg>
-            <span>Trusted by 50K+ users worldwide</span>
+            <span>Trusted by thousands worldwide</span>
           </div>
         </div>
 
-        <!-- Main Heading -->
+        <!-- Main Heading - REDUCED SIZE -->
         <div class="text-center mb-12 animate-slide-up">
-          <h1 class="text-6xl md:text-8xl font-black text-white mb-6 leading-tight">
+          <h1 class="text-4xl md:text-6xl font-black text-white mb-6 leading-tight">
             Transform Long URLs
             <br />
             Into <span class="text-gradient">Powerful</span> Links
           </h1>
-          <p class="text-xl md:text-2xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
-            The most advanced link management platform with real-time analytics, 
-            custom branding, and enterprise-grade security.
+          <p class="text-lg md:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
+            A simple, speedy, and secure link shortener with analytics, 100% powered by Cloudflare.
           </p>
         </div>
 
@@ -129,8 +140,8 @@ const handleCopy = async () => {
                 </div>
                 <input
                   v-model="url"
-                  type="text"
-                  placeholder="Paste your long URL here..."
+                  type="url"
+                  placeholder="Paste your long URL here (e.g., https://example.com)..."
                   class="w-full pl-14 pr-4 py-5 bg-white/5 border-2 border-white/10 rounded-2xl text-white placeholder-slate-400 text-lg focus:border-purple-500 focus:outline-none focus:ring-4 focus:ring-purple-500/20 transition-all duration-300"
                   @keyup.enter="handleShorten"
                 />
@@ -154,13 +165,13 @@ const handleCopy = async () => {
                   <div class="absolute inset-0 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 blur-xl transition-opacity -z-10" />
                 </button>
                 <NuxtLink
-                  to="/dashboard/analysis"
+                  to="/dashboard"
                   class="btn-secondary group"
                 >
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
-                  <span>Analytics</span>
+                  <span>Dashboard</span>
                 </NuxtLink>
               </div>
             </div>
@@ -171,7 +182,7 @@ const handleCopy = async () => {
                 <span class="text-sm font-semibold text-purple-400 uppercase tracking-wider">Your Short Link</span>
                 <span class="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-bold animate-pulse">NEW</span>
               </div>
-              <div class="flex items-center gap-3">
+              <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                 <input
                   type="text"
                   :value="shortUrl"
@@ -180,7 +191,7 @@ const handleCopy = async () => {
                 />
                 <button
                   @click="handleCopy"
-                  class="px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-semibold transition-all duration-300 hover:scale-105 flex items-center gap-2"
+                  class="px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-semibold transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 whitespace-nowrap"
                 >
                   <svg v-if="copied" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -188,62 +199,11 @@ const handleCopy = async () => {
                   <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                   </svg>
-                  {{ copied ? 'Copied!' : 'Copy' }}
+                  <span>{{ copied ? 'Copied!' : 'Copy' }}</span>
                 </button>
               </div>
             </div>
           </div>
-        </div>
-
-        <!-- Real-time Stats -->
-        <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 mb-20 animate-fade-in">
-          <NuxtLink to="/dashboard/links" class="stat-card group cursor-pointer">
-            <div class="stat-icon-wrapper">
-              <svg class="w-8 h-8 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-              </svg>
-            </div>
-            <div class="stat-number">{{ formatNumber(stats.links) }}K+</div>
-            <div class="stat-label">Links Created Today</div>
-            <div class="stat-trend">
-              <svg class="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd" />
-              </svg>
-              <span>+23% from yesterday</span>
-            </div>
-          </NuxtLink>
-
-          <NuxtLink to="/dashboard/analysis" class="stat-card group cursor-pointer">
-            <div class="stat-icon-wrapper">
-              <svg class="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <div class="stat-number">{{ stats.clicks.toFixed(1) }}M+</div>
-            <div class="stat-label">Clicks Tracked</div>
-            <div class="stat-trend">
-              <svg class="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd" />
-              </svg>
-              <span>+18% from last week</span>
-            </div>
-          </NuxtLink>
-
-          <NuxtLink to="/dashboard/realtime" class="stat-card group cursor-pointer">
-            <div class="stat-icon-wrapper">
-              <svg class="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-            </div>
-            <div class="stat-number">{{ stats.users.toFixed(1) }}K+</div>
-            <div class="stat-label">Active Users</div>
-            <div class="stat-trend">
-              <svg class="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd" />
-              </svg>
-              <span>+31% this month</span>
-            </div>
-          </NuxtLink>
         </div>
 
         <!-- Feature Highlights -->
@@ -267,15 +227,18 @@ const handleCopy = async () => {
           </div>
         </div>
 
-        <!-- Social Proof -->
+        <!-- CTA Section -->
         <div class="text-center animate-fade-in">
-          <p class="text-slate-400 mb-6">Trusted by leading companies worldwide</p>
-          <div class="flex flex-wrap justify-center items-center gap-12 opacity-60">
-            <div class="text-2xl font-bold text-white">GOOGLE</div>
-            <div class="text-2xl font-bold text-white">MICROSOFT</div>
-            <div class="text-2xl font-bold text-white">AMAZON</div>
-            <div class="text-2xl font-bold text-white">NETFLIX</div>
-          </div>
+          <p class="text-slate-400 mb-6">Ready to get started?</p>
+          <NuxtLink
+            to="/dashboard"
+            class="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-2xl hover:scale-105 transition-transform duration-300 shadow-lg hover:shadow-purple-500/50"
+          >
+            <span>Access Dashboard</span>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </NuxtLink>
         </div>
       </div>
     </div>
@@ -367,7 +330,6 @@ const handleCopy = async () => {
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: gradient-shift 3s ease infinite;
 }
 
 .btn-primary {
@@ -421,77 +383,6 @@ const handleCopy = async () => {
   transform: translateY(-2px);
 }
 
-.stat-card {
-  position: relative;
-  padding: 2rem;
-  background: rgba(255,255,255,0.03);
-  backdrop-filter: blur(20px);
-  border-radius: 1.5rem;
-  border: 1px solid rgba(255,255,255,0.1);
-  transition: all 0.3s ease;
-  overflow: hidden;
-  text-decoration: none;
-  display: block;
-}
-
-.stat-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #a855f7, #ec4899, #f59e0b);
-  transform: translateX(-100%);
-  transition: transform 0.6s ease;
-}
-
-.stat-card:hover::before {
-  transform: translateX(0);
-}
-
-.stat-card:hover {
-  transform: translateY(-5px);
-  border-color: rgba(168,85,247,0.3);
-  background: rgba(255,255,255,0.05);
-}
-
-.stat-icon-wrapper {
-  width: 60px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(168,85,247,0.1);
-  border-radius: 1rem;
-  margin-bottom: 1rem;
-}
-
-.stat-number {
-  font-size: 3rem;
-  font-weight: 900;
-  background: linear-gradient(135deg, #a855f7, #ec4899);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin-bottom: 0.5rem;
-}
-
-.stat-label {
-  color: #cbd5e1;
-  font-size: 1rem;
-  margin-bottom: 0.75rem;
-}
-
-.stat-trend {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #86efac;
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
 .feature-card {
   padding: 2rem;
   background: rgba(255,255,255,0.02);
@@ -516,10 +407,7 @@ const handleCopy = async () => {
 
 @media (max-width: 768px) {
   h1 {
-    font-size: 3rem !important;
-  }
-  .stat-number {
-    font-size: 2rem;
+    font-size: 2.5rem !important;
   }
 }
 </style>
