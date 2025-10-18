@@ -35,7 +35,7 @@ const handleShorten = async () => {
     // Calculate 4-hour expiry for public links
     const fourHoursFromNow = Math.floor(Date.now() / 1000) + (4 * 60 * 60)
     
-    // Use the public create endpoint (no auth required, no headers)
+    // Use the create endpoint (no auth required)
     const response = await $fetch('/api/link/create', {
       method: 'POST',
       body: {
@@ -48,7 +48,7 @@ const handleShorten = async () => {
     if (response && response.shortLink) {
       shortUrl.value = response.shortLink
       // Show success notification
-      showExpiryNotification()
+      displayExpiryNotification()
     } else {
       throw new Error('Failed to create short link')
     }
@@ -63,7 +63,7 @@ const handleShorten = async () => {
 const showExpiryNotification = ref(false)
 const notificationTimeout = ref(null)
 
-function showExpiryNotification() {
+function displayExpiryNotification() {
   showExpiryNotification.value = true
   
   // Clear any existing timeout
@@ -417,3 +417,12 @@ const handleCopy = async () => {
   transform: translateY(-10px);
 }
 </style>
+```
+
+---
+
+## 📁 File Location
+
+Save this as:
+```
+app/components/home/Hero.vue
