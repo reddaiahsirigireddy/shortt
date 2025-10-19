@@ -18,7 +18,7 @@
   "analytics_engine_datasets": [
     {
       "binding": "ANALYTICS",
-      "dataset": "srlinks"
+      "dataset": "sink"
     }
   ],
   "kv_namespaces": [
