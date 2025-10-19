@@ -20,7 +20,9 @@ const { email, telegram, blog, mastodon, github } = useAppConfig()
       >
         &copy; {{ new Date().getFullYear() }} urlsclickearn.xyz
       </a>
-      <span class="inline-flex justify-center mt-4 space-x-5 sm:ml-auto sm:mt-0 sm:justify-start">
+      <span
+        class="inline-flex justify-center mt-4 space-x-5 sm:ml-auto sm:mt-0 sm:justify-start"
+      >
         <a
           v-if="email"
           :href="`mailto:${email}`"
@@ -73,16 +75,18 @@ const { email, telegram, blog, mastodon, github } = useAppConfig()
       </span>
     </div>
     
-    <!-- Social Bar Ad Script -->
+    <!-- Social Bar Ad Script - Before closing body tag -->
     <script type='text/javascript' src='//preferablyending.com/b1/c5/45/b1c5454db9d9699cc2f9072a41d2f475.js'></script>
   </section>
 </template>
 
 <style scoped>
+/* Add glow effect on icon hover */
 a:hover svg {
   filter: drop-shadow(0 0 10px rgba(255, 237, 78, 0.6));
 }
 
+/* Text hover glow */
 a:hover {
   text-shadow: 0 0 20px rgba(255, 237, 78, 0.5);
 }
